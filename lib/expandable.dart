@@ -112,6 +112,8 @@ class ExpandableThemeData {
   ///The [BorderRadius] for the [InkWell], if `inkWell` is set to true
   final BorderRadius? inkWellBorderRadius;
 
+  final Widget? customIcon;
+
   const ExpandableThemeData({
     this.iconColor,
     this.useInkWell,
@@ -134,10 +136,10 @@ class ExpandableThemeData {
     this.expandIcon,
     this.collapseIcon,
     this.inkWellBorderRadius,
+    this.customIcon,
   });
 
-  static ExpandableThemeData combine(
-      ExpandableThemeData? theme, ExpandableThemeData? defaults) {
+  static ExpandableThemeData combine(ExpandableThemeData? theme, ExpandableThemeData? defaults) {
     if (defaults == null || defaults.isEmpty()) {
       return theme ?? empty;
     } else if (theme == null || theme.isEmpty()) {
@@ -148,12 +150,9 @@ class ExpandableThemeData {
       return ExpandableThemeData(
         iconColor: theme.iconColor ?? defaults.iconColor,
         useInkWell: theme.useInkWell ?? defaults.useInkWell,
-        inkWellBorderRadius:
-            theme.inkWellBorderRadius ?? defaults.inkWellBorderRadius,
-        animationDuration:
-            theme.animationDuration ?? defaults.animationDuration,
-        scrollAnimationDuration:
-            theme.scrollAnimationDuration ?? defaults.scrollAnimationDuration,
+        inkWellBorderRadius: theme.inkWellBorderRadius ?? defaults.inkWellBorderRadius,
+        animationDuration: theme.animationDuration ?? defaults.animationDuration,
+        scrollAnimationDuration: theme.scrollAnimationDuration ?? defaults.scrollAnimationDuration,
         crossFadePoint: theme.crossFadePoint ?? defaults.crossFadePoint,
         fadeCurve: theme.fadeCurve ?? defaults.fadeCurve,
         sizeCurve: theme.sizeCurve ?? defaults.sizeCurve,
@@ -161,30 +160,25 @@ class ExpandableThemeData {
         headerAlignment: theme.headerAlignment ?? defaults.headerAlignment,
         bodyAlignment: theme.bodyAlignment ?? defaults.bodyAlignment,
         iconPlacement: theme.iconPlacement ?? defaults.iconPlacement,
-        tapHeaderToExpand:
-            theme.tapHeaderToExpand ?? defaults.tapHeaderToExpand,
+        tapHeaderToExpand: theme.tapHeaderToExpand ?? defaults.tapHeaderToExpand,
         tapBodyToExpand: theme.tapBodyToExpand ?? defaults.tapBodyToExpand,
-        tapBodyToCollapse:
-            theme.tapBodyToCollapse ?? defaults.tapBodyToCollapse,
+        tapBodyToCollapse: theme.tapBodyToCollapse ?? defaults.tapBodyToCollapse,
         hasIcon: theme.hasIcon ?? defaults.hasIcon,
         iconSize: theme.iconSize ?? defaults.iconSize,
         iconPadding: theme.iconPadding ?? defaults.iconPadding,
-        iconRotationAngle:
-            theme.iconRotationAngle ?? defaults.iconRotationAngle,
+        iconRotationAngle: theme.iconRotationAngle ?? defaults.iconRotationAngle,
         expandIcon: theme.expandIcon ?? defaults.expandIcon,
         collapseIcon: theme.collapseIcon ?? defaults.collapseIcon,
+        customIcon: theme.customIcon ?? defaults.customIcon,
       );
     }
   }
 
-  double get collapsedFadeStart =>
-      crossFadePoint! < 0.5 ? 0 : (crossFadePoint! * 2 - 1);
+  double get collapsedFadeStart => crossFadePoint! < 0.5 ? 0 : (crossFadePoint! * 2 - 1);
 
-  double get collapsedFadeEnd =>
-      crossFadePoint! < 0.5 ? 2 * crossFadePoint! : 1;
+  double get collapsedFadeEnd => crossFadePoint! < 0.5 ? 2 * crossFadePoint! : 1;
 
-  double get expandedFadeStart =>
-      crossFadePoint! < 0.5 ? 0 : (crossFadePoint! * 2 - 1);
+  double get expandedFadeStart => crossFadePoint! < 0.5 ? 0 : (crossFadePoint! * 2 - 1);
 
   double get expandedFadeEnd => crossFadePoint! < 0.5 ? 2 * crossFadePoint! : 1;
 
@@ -215,7 +209,8 @@ class ExpandableThemeData {
         this.hasIcon != null &&
         this.iconRotationAngle != null &&
         this.expandIcon != null &&
-        this.collapseIcon != null;
+        this.collapseIcon != null &&
+        this.customIcon != null;
   }
 
   bool operator ==(dynamic o) {
@@ -240,7 +235,8 @@ class ExpandableThemeData {
           this.hasIcon == o.hasIcon &&
           this.iconRotationAngle == o.iconRotationAngle &&
           this.expandIcon == o.expandIcon &&
-          this.collapseIcon == o.collapseIcon;
+          this.collapseIcon == o.collapseIcon &&
+          this.customIcon == o.customIcon;
     } else {
       return false;
     }
@@ -250,23 +246,19 @@ class ExpandableThemeData {
     return 0; // we don't care
   }
 
-  static ExpandableThemeData of(BuildContext context,
-      {bool rebuildOnChange = true}) {
+  static ExpandableThemeData of(BuildContext context, {bool rebuildOnChange = true}) {
     final notifier = rebuildOnChange
         ? context.dependOnInheritedWidgetOfExactType<_ExpandableThemeNotifier>()
         : context.findAncestorWidgetOfExactType<_ExpandableThemeNotifier>();
     return notifier?.themeData ?? defaults;
   }
 
-  static ExpandableThemeData withDefaults(
-      ExpandableThemeData? theme, BuildContext context,
+  static ExpandableThemeData withDefaults(ExpandableThemeData? theme, BuildContext context,
       {bool rebuildOnChange = true}) {
     if (theme != null && theme.isFull()) {
       return theme;
     } else {
-      return combine(
-          combine(theme, of(context, rebuildOnChange: rebuildOnChange)),
-          defaults);
+      return combine(combine(theme, of(context, rebuildOnChange: rebuildOnChange)), defaults);
     }
   }
 }
@@ -279,8 +271,7 @@ class ExpandableTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _ExpandableThemeNotifier? n =
-        context.dependOnInheritedWidgetOfExactType<_ExpandableThemeNotifier>();
+    _ExpandableThemeNotifier? n = context.dependOnInheritedWidgetOfExactType<_ExpandableThemeNotifier>();
     return _ExpandableThemeNotifier(
       themeData: ExpandableThemeData.combine(data, n?.themeData),
       child: this.child,
@@ -322,15 +313,13 @@ class _ExpandableNotifierState extends State<ExpandableNotifier> {
   @override
   void initState() {
     super.initState();
-    controller = widget.controller ??
-        ExpandableController(initialExpanded: widget.initialExpanded ?? false);
+    controller = widget.controller ?? ExpandableController(initialExpanded: widget.initialExpanded ?? false);
   }
 
   @override
   void didUpdateWidget(ExpandableNotifier oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller &&
-        widget.controller != null) {
+    if (widget.controller != oldWidget.controller && widget.controller != null) {
       setState(() {
         controller = widget.controller;
       });
@@ -339,20 +328,15 @@ class _ExpandableNotifierState extends State<ExpandableNotifier> {
 
   @override
   Widget build(BuildContext context) {
-    final cn = _ExpandableControllerNotifier(
-        controller: controller, child: widget.child);
-    return theme != null
-        ? _ExpandableThemeNotifier(themeData: theme, child: cn)
-        : cn;
+    final cn = _ExpandableControllerNotifier(controller: controller, child: widget.child);
+    return theme != null ? _ExpandableThemeNotifier(themeData: theme, child: cn) : cn;
   }
 }
 
 /// Makes an [ExpandableController] available to the widget subtree.
 /// Useful for making multiple [Expandable] widgets synchronized with a single controller.
-class _ExpandableControllerNotifier
-    extends InheritedNotifier<ExpandableController> {
-  _ExpandableControllerNotifier(
-      {required ExpandableController? controller, required Widget child})
+class _ExpandableControllerNotifier extends InheritedNotifier<ExpandableController> {
+  _ExpandableControllerNotifier({required ExpandableController? controller, required Widget child})
       : super(notifier: controller, child: child);
 }
 
@@ -361,13 +345,11 @@ class _ExpandableControllerNotifier
 class _ExpandableThemeNotifier extends InheritedWidget {
   final ExpandableThemeData? themeData;
 
-  _ExpandableThemeNotifier({required this.themeData, required Widget child})
-      : super(child: child);
+  _ExpandableThemeNotifier({required this.themeData, required Widget child}) : super(child: child);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
-    return !(oldWidget is _ExpandableThemeNotifier &&
-        oldWidget.themeData == themeData);
+    return !(oldWidget is _ExpandableThemeNotifier && oldWidget.themeData == themeData);
   }
 }
 
@@ -391,15 +373,11 @@ class ExpandableController extends ValueNotifier<bool> {
     expanded = !expanded;
   }
 
-  static ExpandableController? of(BuildContext context,
-      {bool rebuildOnChange = true, bool required = false}) {
+  static ExpandableController? of(BuildContext context, {bool rebuildOnChange = true, bool required = false}) {
     final notifier = rebuildOnChange
-        ? context
-            .dependOnInheritedWidgetOfExactType<_ExpandableControllerNotifier>()
-        : context
-            .findAncestorWidgetOfExactType<_ExpandableControllerNotifier>();
-    assert(notifier != null || !required,
-        "ExpandableNotifier is not found in widget tree");
+        ? context.dependOnInheritedWidgetOfExactType<_ExpandableControllerNotifier>()
+        : context.findAncestorWidgetOfExactType<_ExpandableControllerNotifier>();
+    assert(notifier != null || !required, "ExpandableNotifier is not found in widget tree");
     return notifier?.notifier;
   }
 }
@@ -428,29 +406,23 @@ class Expandable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller =
-        this.controller ?? ExpandableController.of(context, required: true);
+    final controller = this.controller ?? ExpandableController.of(context, required: true);
     final theme = ExpandableThemeData.withDefaults(this.theme, context);
 
     return AnimatedCrossFade(
       alignment: theme.alignment!,
       firstChild: collapsed,
       secondChild: expanded,
-      firstCurve: Interval(theme.collapsedFadeStart, theme.collapsedFadeEnd,
-          curve: theme.fadeCurve!),
-      secondCurve: Interval(theme.expandedFadeStart, theme.expandedFadeEnd,
-          curve: theme.fadeCurve!),
+      firstCurve: Interval(theme.collapsedFadeStart, theme.collapsedFadeEnd, curve: theme.fadeCurve!),
+      secondCurve: Interval(theme.expandedFadeStart, theme.expandedFadeEnd, curve: theme.fadeCurve!),
       sizeCurve: theme.sizeCurve!,
-      crossFadeState: controller?.expanded ?? true
-          ? CrossFadeState.showSecond
-          : CrossFadeState.showFirst,
+      crossFadeState: controller?.expanded ?? true ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       duration: theme.animationDuration!,
     );
   }
 }
 
-typedef Widget ExpandableBuilder(
-    BuildContext context, Widget collapsed, Widget expanded);
+typedef Widget ExpandableBuilder(BuildContext context, Widget collapsed, Widget expanded);
 
 /// Determines the placement of the expand/collapse icon in [ExpandablePanel]
 enum ExpandablePanelIconPlacement {
@@ -532,16 +504,12 @@ class ExpandablePanel extends StatelessWidget {
         }
       }
 
-      Widget wrapWithExpandableButton(
-          {required Widget? widget, required bool wrap}) {
-        return wrap
-            ? ExpandableButton(child: widget, theme: theme)
-            : widget ?? Container();
+      Widget wrapWithExpandableButton({required Widget? widget, required bool wrap}) {
+        return wrap ? ExpandableButton(child: widget, theme: theme) : widget ?? Container();
       }
 
       if (!theme.hasIcon!) {
-        return wrapWithExpandableButton(
-            widget: header, wrap: theme.tapHeaderToExpand!);
+        return wrapWithExpandableButton(widget: header, wrap: theme.tapHeaderToExpand!);
       } else {
         final rowChildren = <Widget>[
           Expanded(
@@ -549,16 +517,16 @@ class ExpandablePanel extends StatelessWidget {
           ),
           // ignore: deprecated_member_use_from_same_package
           wrapWithExpandableButton(
-              widget: ExpandableIcon(theme: theme),
-              wrap: !theme.tapHeaderToExpand!)
+            widget: ExpandableIcon(theme: theme),
+            wrap: !theme.tapHeaderToExpand!,
+          )
         ];
         return wrapWithExpandableButton(
             widget: Row(
               crossAxisAlignment: calculateHeaderCrossAxisAlignment(),
-              children:
-                  theme.iconPlacement! == ExpandablePanelIconPlacement.right
-                      ? rowChildren
-                      : rowChildren.reversed.toList(),
+              children: theme.iconPlacement! == ExpandablePanelIconPlacement.right
+                  ? rowChildren
+                  : rowChildren.reversed.toList(),
             ),
             wrap: theme.tapHeaderToExpand!);
       }
@@ -604,8 +572,8 @@ class ExpandablePanel extends StatelessWidget {
             );
           };
 
-      return builder(context, wrapBody(collapsed, theme.tapBodyToExpand!),
-          wrapBody(expanded, theme.tapBodyToCollapse!));
+      return builder(
+          context, wrapBody(collapsed, theme.tapBodyToExpand!), wrapBody(expanded, theme.tapBodyToCollapse!));
     }
 
     Widget buildWithHeader() {
@@ -626,8 +594,7 @@ class ExpandablePanel extends StatelessWidget {
         child: panel,
       );
     } else {
-      final controller =
-          ExpandableController.of(context, rebuildOnChange: false);
+      final controller = ExpandableController.of(context, rebuildOnChange: false);
       if (controller == null) {
         return ExpandableNotifier(
           child: panel,
@@ -653,8 +620,7 @@ class ExpandableIcon extends StatefulWidget {
   _ExpandableIconState createState() => _ExpandableIconState();
 }
 
-class _ExpandableIconState extends State<ExpandableIcon>
-    with SingleTickerProviderStateMixin {
+class _ExpandableIconState extends State<ExpandableIcon> with SingleTickerProviderStateMixin {
   AnimationController? animationController;
   Animation<double>? animation;
   ExpandableThemeData? theme;
@@ -663,14 +629,11 @@ class _ExpandableIconState extends State<ExpandableIcon>
   @override
   void initState() {
     super.initState();
-    final theme = ExpandableThemeData.withDefaults(widget.theme, context,
-        rebuildOnChange: false);
-    animationController =
-        AnimationController(duration: theme.animationDuration, vsync: this);
-    animation = animationController!.drive(Tween<double>(begin: 0.0, end: 1.0)
-        .chain(CurveTween(curve: theme.sizeCurve!)));
-    controller = ExpandableController.of(context,
-        rebuildOnChange: false, required: true);
+    final theme = ExpandableThemeData.withDefaults(widget.theme, context, rebuildOnChange: false);
+    animationController = AnimationController(duration: theme.animationDuration, vsync: this);
+    animation =
+        animationController!.drive(Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: theme.sizeCurve!)));
+    controller = ExpandableController.of(context, rebuildOnChange: false, required: true);
     controller?.addListener(_expandedStateChanged);
     if (controller?.expanded ?? true) {
       animationController!.value = 1.0;
@@ -694,12 +657,10 @@ class _ExpandableIconState extends State<ExpandableIcon>
 
   _expandedStateChanged() {
     if (controller!.expanded &&
-        const [AnimationStatus.dismissed, AnimationStatus.reverse]
-            .contains(animationController!.status)) {
+        const [AnimationStatus.dismissed, AnimationStatus.reverse].contains(animationController!.status)) {
       animationController!.forward();
     } else if (!controller!.expanded &&
-        const [AnimationStatus.completed, AnimationStatus.forward]
-            .contains(animationController!.status)) {
+        const [AnimationStatus.completed, AnimationStatus.forward].contains(animationController!.status)) {
       animationController!.reverse();
     }
   }
@@ -707,8 +668,7 @@ class _ExpandableIconState extends State<ExpandableIcon>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final controller2 = ExpandableController.of(context,
-        rebuildOnChange: false, required: true);
+    final controller2 = ExpandableController.of(context, rebuildOnChange: false, required: true);
     if (controller2 != controller) {
       controller?.removeListener(_expandedStateChanged);
       controller = controller2;
@@ -722,24 +682,21 @@ class _ExpandableIconState extends State<ExpandableIcon>
   @override
   Widget build(BuildContext context) {
     final theme = ExpandableThemeData.withDefaults(widget.theme, context);
-
     return Padding(
       padding: theme.iconPadding!,
       child: AnimatedBuilder(
         animation: animation!,
         builder: (context, child) {
-          final showSecondIcon = theme.collapseIcon! != theme.expandIcon! &&
-              animationController!.value >= 0.5;
+          final showSecondIcon = theme.collapseIcon! != theme.expandIcon! && animationController!.value >= 0.5;
           return Transform.rotate(
             angle: theme.iconRotationAngle! *
-                (showSecondIcon
-                    ? -(1.0 - animationController!.value)
-                    : animationController!.value),
-            child: Icon(
-              showSecondIcon ? theme.collapseIcon! : theme.expandIcon!,
-              color: theme.iconColor!,
-              size: theme.iconSize!,
-            ),
+                (showSecondIcon ? -(1.0 - animationController!.value) : animationController!.value),
+            child: theme.customIcon ??
+                Icon(
+                  showSecondIcon ? theme.collapseIcon! : theme.expandIcon!,
+                  color: theme.iconColor!,
+                  size: theme.iconSize!,
+                ),
           );
         },
       ),
@@ -812,16 +769,14 @@ class _ScrollOnExpandState extends State<ScrollOnExpand> {
   @override
   void initState() {
     super.initState();
-    _controller = ExpandableController.of(context,
-        rebuildOnChange: false, required: true);
+    _controller = ExpandableController.of(context, rebuildOnChange: false, required: true);
     _controller?.addListener(_expandedStateChanged);
   }
 
   @override
   void didUpdateWidget(ScrollOnExpand oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final newController = ExpandableController.of(context,
-        rebuildOnChange: false, required: true);
+    final newController = ExpandableController.of(context, rebuildOnChange: false, required: true);
     if (newController != _controller) {
       _controller?.removeListener(_expandedStateChanged);
       _controller = newController;
@@ -840,23 +795,19 @@ class _ScrollOnExpandState extends State<ScrollOnExpand> {
     if (_isAnimating == 0 && _lastContext != null && mounted) {
       if ((_controller?.expanded ?? true && widget.scrollOnExpand) ||
           (!(_controller?.expanded ?? true) && widget.scrollOnCollapse)) {
-        _lastContext
-            ?.findRenderObject()
-            ?.showOnScreen(duration: _animationDuration);
+        _lastContext?.findRenderObject()?.showOnScreen(duration: _animationDuration);
       }
     }
   }
 
   Duration get _animationDuration {
-    return _theme?.scrollAnimationDuration ??
-        ExpandableThemeData.defaults.animationDuration!;
+    return _theme?.scrollAnimationDuration ?? ExpandableThemeData.defaults.animationDuration!;
   }
 
   _expandedStateChanged() {
     if (_theme != null) {
       _isAnimating++;
-      Future.delayed(
-          _animationDuration + Duration(milliseconds: 10), _animationComplete);
+      Future.delayed(_animationDuration + Duration(milliseconds: 10), _animationComplete);
     }
   }
 

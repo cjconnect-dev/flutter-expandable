@@ -84,7 +84,6 @@ class Card1 extends StatelessWidget {
                     padding: EdgeInsets.all(10),
                     child: Text(
                       "ExpandablePanel",
-                      style: Theme.of(context).textTheme.body2,
                     )),
                 collapsed: Text(
                   loremIpsum,
@@ -139,22 +138,17 @@ class Card2 extends StatelessWidget {
     }
 
     buildCollapsed1() {
-      return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Expandable",
-                    style: Theme.of(context).textTheme.body1,
-                  ),
-                ],
-              ),
-            ),
-          ]);
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text("Expandable"),
+            ],
+          ),
+        ),
+      ]);
     }
 
     buildCollapsed2() {
@@ -166,26 +160,23 @@ class Card2 extends StatelessWidget {
     }
 
     buildExpanded1() {
-      return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Expandable",
-                    style: Theme.of(context).textTheme.body1,
-                  ),
-                  Text(
-                    "3 Expandable widgets",
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                ],
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Expandable",
               ),
-            ),
-          ]);
+              Text(
+                "3 Expandable widgets",
+                style: Theme.of(context).textTheme.caption,
+              ),
+            ],
+          ),
+        ),
+      ]);
     }
 
     buildExpanded2() {
@@ -252,15 +243,11 @@ class Card2 extends StatelessWidget {
                 children: <Widget>[
                   Builder(
                     builder: (context) {
-                      var controller =
-                          ExpandableController.of(context, required: true)!;
+                      var controller = ExpandableController.of(context, required: true)!;
                       return TextButton(
                         child: Text(
                           controller.expanded ? "COLLAPSE" : "EXPAND",
-                          style: Theme.of(context)
-                              .textTheme
-                              .button!
-                              .copyWith(color: Colors.deepPurple),
+                          style: Theme.of(context).textTheme.button!.copyWith(color: Colors.deepPurple),
                         ),
                         onPressed: () {
                           controller.toggle();
@@ -331,10 +318,7 @@ class Card3 extends StatelessWidget {
                         Expanded(
                           child: Text(
                             "Items",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText1!
-                                .copyWith(color: Colors.white),
+                            style: Theme.of(context).textTheme.bodyText1!.copyWith(color: Colors.white),
                           ),
                         ),
                       ],
